@@ -1,3 +1,5 @@
+from pprint import pprint
+
 from rest_framework import serializers
 from rest_framework.validators import UniqueTogetherValidator
 
@@ -65,7 +67,7 @@ class FollowSerializer(serializers.ModelSerializer):
 
     def validate_following(self, value):
         """Check inequality fields."""
-        if value == self.fields['user']:
+        if value == self.context['request'].user:
             raise serializers.ValidationError(
                 'Подписаться на самого себя нельзя!')
         return value
