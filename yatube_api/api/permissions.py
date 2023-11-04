@@ -2,6 +2,9 @@ from rest_framework.permissions import BasePermission, SAFE_METHODS
 
 
 class OwnerOrReadOnly(BasePermission):
+    """Check: owner of object - full access,
+              other - read only access.
+    """
 
     def has_permission(self, request, view):
         return (
@@ -14,9 +17,3 @@ class OwnerOrReadOnly(BasePermission):
             request.method in SAFE_METHODS
             or request.user == obj.author
         )
-
-
-class ReadOnly(BasePermission):
-
-    def has_permission(self, request, view):
-        return request.method in SAFE_METHODS

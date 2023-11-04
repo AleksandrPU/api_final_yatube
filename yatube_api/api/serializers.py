@@ -1,42 +1,48 @@
 from rest_framework import serializers
-from rest_framework.relations import SlugRelatedField
 from rest_framework.validators import UniqueTogetherValidator
 
 
 from posts.models import Comment, Follow, Group, Post, User
 
 
-class PostSerializer(serializers.ModelSerializer):
-    author = SlugRelatedField(
+class BaseAuthorSerializer(serializers.ModelSerializer):
+    """Base serializer with read only field 'author'."""
+
+    author = serializers.SlugRelatedField(
         slug_field='username',
         read_only=True,
         default=serializers.CurrentUserDefault()
     )
 
+
+class PostSerializer(BaseAuthorSerializer):
+    """Serializer for posts."""
+
     class Meta:
-        fields = '__all__'
         model = Post
+        fields = '__all__'
 
 
-class CommentSerializer(serializers.ModelSerializer):
-    author = serializers.SlugRelatedField(
-        read_only=True, slug_field='username'
-    )
+class CommentSerializer(BaseAuthorSerializer):
+    """Serializer for comments."""
 
     class Meta:
-        fields = '__all__'
         model = Comment
+        fields = '__all__'
         read_only_fields = ('post',)
 
 
 class GroupSerializer(serializers.ModelSerializer):
+    """Serializer for groups."""
 
     class Meta:
-        fields = '__all__'
         model = Group
+        fields = '__all__'
 
 
 class FollowSerializer(serializers.ModelSerializer):
+    """Serializer for follows with unique validation."""
+
     user = serializers.SlugRelatedField(
         slug_field='username',
         queryset=User.objects.all(),
@@ -50,6 +56,7 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'following')
+        # Check unique combination of fields
         validators = [
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
@@ -58,6 +65,7 @@ class FollowSerializer(serializers.ModelSerializer):
         ]
 
     def validate(self, data):
+        """Check inequality fields."""
         if data['user'] == data['following']:
             raise serializers.ValidationError(
                 'Подписаться на самого себя нельзя!')

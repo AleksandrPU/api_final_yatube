@@ -6,53 +6,88 @@ from posts.constants import STRING_LENGTH_LIMIT
 User = get_user_model()
 
 
-class Post(models.Model):
-    text = models.TextField()
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+class AuthorTextModel(models.Model):
+    """Abstract model with fields text and author."""
+
+    text = models.TextField('Текст')
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE)
+        User, on_delete=models.CASCADE, verbose_name='Автор')
+
+    class Meta:
+        abstract = True
+
+
+class Post(AuthorTextModel):
+    """Model to describe a post."""
+
+    pub_date = models.DateTimeField(
+        'Дата публикации', auto_now_add=True)
     image = models.ImageField(
-        upload_to='posts/', null=True, blank=True)
-    group = models.ForeignKey('Group', on_delete=models.SET_NULL, null=True)
+        'Изображение', upload_to='posts/', null=True, blank=True)
+    group = models.ForeignKey(
+        'Group',
+        on_delete=models.SET_NULL,
+        null=True,
+        verbose_name='Сообщество'
+    )
 
     class Meta:
         default_related_name = 'posts'
+        verbose_name = 'публикация'
+        verbose_name_plural = 'Публикации'
 
     def __str__(self):
         return self.text[:STRING_LENGTH_LIMIT]
 
 
-class Comment(models.Model):
-    author = models.ForeignKey(
-        User, on_delete=models.CASCADE)
+class Comment(AuthorTextModel):
+    """Model to describe comments of posts."""
+
     post = models.ForeignKey(
-        Post, on_delete=models.CASCADE)
-    text = models.TextField()
+        Post, on_delete=models.CASCADE, verbose_name='Пост')
     created = models.DateTimeField(
         'Дата добавления', auto_now_add=True, db_index=True)
 
     class Meta:
         default_related_name = 'comments'
+        verbose_name = 'комментарий'
+        verbose_name_plural = 'Комментарии'
 
     def __str__(self):
-        return f'{self.author} к {self.post}: {self.text[:STRING_LENGTH_LIMIT]}'
+        return (f'{self.author} к посту {self.post.id}: '
+                f'{self.text[:STRING_LENGTH_LIMIT]}')
 
 
 class Group(models.Model):
-    title = models.CharField(max_length=50)
-    slug = models.SlugField(max_length=16)
-    description = models.TextField()
+    """Model to describe groups of posts."""
+
+    title = models.CharField('Название', max_length=50)
+    slug = models.SlugField('Короткое название', max_length=16)
+    description = models.TextField('Описание')
+
+    class Meta:
+        verbose_name = 'сообщество'
+        verbose_name_plural = 'Сообщества'
 
     def __str__(self):
         return self.title[:STRING_LENGTH_LIMIT]
 
 
 class Follow(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    """Model to describe follows of users."""
+
+    user = models.ForeignKey(
+        User, on_delete=models.CASCADE, verbose_name='Пользователь')
     following = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='following')
+        User,
+        on_delete=models.CASCADE,
+        related_name='following',
+        verbose_name='Подписка'
+    )
 
     class Meta:
+        verbose_name = 'подписка'
+        verbose_name_plural = 'Подписки'
         constraints = [
             models.UniqueConstraint(
                 fields=['user', 'following'],
