@@ -56,7 +56,6 @@ class FollowSerializer(serializers.ModelSerializer):
     class Meta:
         model = Follow
         fields = ('user', 'following')
-        # Check unique combination of fields
         validators = [
             UniqueTogetherValidator(
                 queryset=Follow.objects.all(),
@@ -64,9 +63,9 @@ class FollowSerializer(serializers.ModelSerializer):
             )
         ]
 
-    def validate(self, data):
+    def validate_following(self, value):
         """Check inequality fields."""
-        if data['user'] == data['following']:
+        if value == self.fields['user']:
             raise serializers.ValidationError(
                 'Подписаться на самого себя нельзя!')
-        return data
+        return value

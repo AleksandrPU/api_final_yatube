@@ -8,6 +8,15 @@
 
 Проект поддерживает создание jwt-токенов для аутентификации.
 
+# Используемый стек технологий
+
+Проект написан на языке **Python-3.9** с использованием фреймворков:
+
+- [Django-3.2](https://www.djangoproject.com/)
+- [Django Rest Framework](https://www.django-rest-framework.org/)
+
+Для создания токенов и аутентификации пользователей применен [djoser](https://djoser.readthedocs.io). 
+
 # Установка и запуск проекта:
 
 Клонировать репозиторий и перейти в него в командной строке:
@@ -140,3 +149,7 @@ python3 manage.py runserver
   "group": 0
 }
 ```
+
+# Автор
+
+Проект написан Паутовым Александром на основе репозитория [yandex-praktikum/api_final_yatube](https://github.com/yandex-praktikum/api_final_yatube)

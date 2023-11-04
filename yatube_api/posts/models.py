@@ -35,6 +35,7 @@ class Post(AuthorTextModel):
         default_related_name = 'posts'
         verbose_name = 'публикация'
         verbose_name_plural = 'Публикации'
+        ordering = ('-pub_date',)
 
     def __str__(self):
         return self.text[:STRING_LENGTH_LIMIT]
@@ -77,7 +78,9 @@ class Follow(models.Model):
     """Model to describe follows of users."""
 
     user = models.ForeignKey(
-        User, on_delete=models.CASCADE, verbose_name='Пользователь')
+        User, on_delete=models.CASCADE, verbose_name='Пользователь',
+        related_name='followers',
+    )
     following = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -92,6 +95,10 @@ class Follow(models.Model):
             models.UniqueConstraint(
                 fields=['user', 'following'],
                 name='unique_user_following'
+            ),
+            models.CheckConstraint(
+                check=~models.Q(user=models.F('following')),
+                name='no_self_follows'
             )
         ]
 
